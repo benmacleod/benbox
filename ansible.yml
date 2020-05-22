@@ -1,0 +1,23 @@
+- hosts: all
+  remote_user: ben
+  become: yes
+
+  pre_tasks:
+    - name: Install Python if not already present.
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python2-minimal)
+      changed_when: False
+
+  tasks:
+    - name: Add docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+
+    - name: Add docker apt repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+
+    - name: Install packages
+      apt: name={{ item }}
+      loop:
+        - "docker-ce={{ docker_version }}"
+        - "docker-ce-cli={{ docker_version }}"
